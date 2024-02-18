@@ -128,7 +128,13 @@ function updateProductById(newProduct) {
 function getTotalInventoryValue() {
     try {
         const totalInventoryValue = Product.getTotalInventoryValue(products);
-        return { status: 200, totalInventoryValue };
+
+        if (totalInventoryValue == 0) {
+            return { status: 404, message: 'It was not possible to calculate the total inventory value because there are no products.' };
+        } else {
+            return { status: 200, totalInventoryValue };
+        }
+
     } catch (error) {
         console.error('Error getting the total inventory value.', error);
         return { status: 500, message: 'Internal server error while getting the total inventory value.' };
@@ -137,7 +143,17 @@ function getTotalInventoryValue() {
 
 function getProductsSortedByPrice(order) {
     try {
+
+        if (order !== 'ASC' && order !== 'DESC') {
+            return { status: 400, message: 'The order parameter is invalid, missing or is empty.' };
+        }
+
         const productsSortedByPrice = Product.getProductsSortedByPrice(products, order.toUpperCase());
+
+        if (productsSortedByPrice.length === 0) {
+            return { status: 404, message: 'It was not possible to sort the products by price because the inventory is empty.'};
+        }
+
         return { status: 200, productsSortedByPrice };
     } catch (error) {
         console.error('Error getting the products sorted by price.', error);
